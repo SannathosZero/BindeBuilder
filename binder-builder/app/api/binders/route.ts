@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
 // 1. AQUÍ ESTÁ EL ARREGLO: Agrega esta línea que lee la URL
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 // 2. Asegúrate de usar el nombre correcto que configuramos
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY ?? '';
 
 // 3. Ahora esta validación no dará error porque ambas variables existen arriba:
 if (!supabaseUrl || !supabaseServiceKey) {
