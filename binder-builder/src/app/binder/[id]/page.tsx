@@ -1,17 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase'; // 👈 Usamos el cliente único y corregido de tu proyecto
 import { notFound } from 'next/navigation';
-
-// Cliente de Supabase para leer los datos en el servidor
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-
-function getSupabaseClient() {
-  if (!supabaseUrl || !supabaseServiceKey) {
-    return null;
-  }
-
-  return createClient(supabaseUrl, supabaseServiceKey);
-}
 
 interface PokemonCard {
   id: string;
@@ -31,22 +19,21 @@ interface BinderSlot {
   notes: string;
 }
 
-// 1. Traer los datos directamente de Supabase usando el ID de la URL
+// 1. Traer los datos directamente de Supabase usando el cliente seguro
 async function getBinderData(id: string) {
-  const supabase = getSupabaseClient();
+  try {
+    const { data, error } = await supabase
+      .from('binders')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (!supabase) {
+    if (error || !data) return null;
+    return data;
+  } catch (e) {
+    console.error("Error cargando binder:", e);
     return null;
   }
-
-  const { data, error } = await supabase
-    .from('binders')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error || !data) return null;
-  return data;
 }
 
 export default async function BinderPublicPage({ params }: { params: Promise<{ id: string }> }) {
@@ -63,7 +50,7 @@ export default async function BinderPublicPage({ params }: { params: Promise<{ i
 
   // Calcular el valor total de esta carpeta específica
   const totalValue = grid.reduce((acc, slot) => {
-    if (slot) return acc + (slot.card.marketPrice * slot.quantity);
+    if (slot && slot.card?.marketPrice) return acc + (slot.card.marketPrice * slot.quantity);
     return acc;
   }, 0);
 
@@ -96,9 +83,9 @@ export default async function BinderPublicPage({ params }: { params: Promise<{ i
               key={index}
               className={`aspect-[2.5/3.5] bg-gray-950 border rounded-xl flex flex-col items-center justify-center overflow-hidden relative border-gray-800 shadow-inner group`}
             >
-              {slot ? (
+              {slot && slot.card ? (
                 <>
-                  <img src={slot.card.images.small} alt={slot.card.name} className="w-full h-full object-cover animate-fade-in" />
+                  <img src={slot.card.images?.small} alt={slot.card.name} className="w-full h-full object-cover animate-fade-in" />
                   
                   {/* Cantidad */}
                   <div className="absolute top-2 right-2 bg-yellow-400 text-gray-950 text-[10px] font-black px-1.5 py-0.5 rounded shadow-md z-10">
@@ -106,7 +93,7 @@ export default async function BinderPublicPage({ params }: { params: Promise<{ i
                   </div>
 
                   {/* Estado / Score */}
-                  {!slot.isReserved && (
+                  {!slot.isReserved && slot.score && (
                     <div className="absolute top-2 left-2 bg-gray-950/80 backdrop-blur-xs text-[9px] font-bold px-1 rounded border border-gray-800 text-yellow-400">
                       {slot.score}
                     </div>
