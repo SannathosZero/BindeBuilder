@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     console.log('📝 Guardando en Supabase:', { rows: body.rows, cols: body.cols });
 
     // Insertamos los datos directamente en la tabla binders de Supabase
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('binders')
       .insert([
         {
