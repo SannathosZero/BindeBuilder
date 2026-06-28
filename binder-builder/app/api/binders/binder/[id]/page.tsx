@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 // 1. CORREGIDO: Usar el nombre exacto configurado en Vercel y Supabase
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! 
+  process.env.SUPABASE_SERVICE_KEY!
 );
 
 interface PokemonCard {
