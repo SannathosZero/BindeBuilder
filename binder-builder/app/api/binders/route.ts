@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+// 1. Asegúrate de leer la URL desde process.env
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL; 
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
+// 2. Ahora la validación de la línea 6 funcionará perfectamente:
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ ERROR: Faltan variables de entorno');
   console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✓' : '✗');
   console.error('SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✓' : '✗');
+  // ... resto de tu código
 }
-
 // Creamos un cliente con privilegios de servidor (ignora bloqueos de RLS / Caché)
 const supabaseAdmin = createClient(
   supabaseUrl || '',
