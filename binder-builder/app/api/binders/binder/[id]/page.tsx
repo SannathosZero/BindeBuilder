@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { notFound } from 'next/navigation';
 
-// Cliente de Supabase para leer los datos en el servidor
+// 1. CORREGIDO: Usar el nombre exacto configurado en Vercel y Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -16,7 +16,6 @@ function getSupabaseClient() {
 interface PokemonCard {
   id: string;
   name: string;
-  images: { small: string };
   marketPrice: number;
   set: string;
   rarity: string;
@@ -31,7 +30,6 @@ interface BinderSlot {
   notes: string;
 }
 
-// 1. Traer los datos directamente de Supabase usando el ID de la URL
 async function getBinderData(id: string) {
   const supabase = getSupabaseClient();
 
@@ -49,11 +47,12 @@ async function getBinderData(id: string) {
   return data;
 }
 
-export default async function BinderPublicPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+// 2. CORREGIDO: Tipado estricto de la Promesa para evitar desajustes en el enrutador de Vercel
+export default async function BinderPublicPage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
   const binder = await getBinderData(id);
 
-  // Si el UUID no existe en la base de datos, muestra la página 404 nativa de Next.js
+  // Si el UUID no existe o falló la conexión por las credenciales, muestra 404
   if (!binder) {
     notFound();
   }
@@ -98,7 +97,11 @@ export default async function BinderPublicPage({ params }: { params: Promise<{ i
             >
               {slot ? (
                 <>
-                  <img src={slot.card.images.small} alt={slot.card.name} className="w-full h-full object-cover animate-fade-in" />
+                  <img 
+                    src={(slot.card as any).images?.small || (slot.card as any).image} 
+                    alt={slot.card.name} 
+                    className="w-full h-full object-contain" 
+                  />
                   
                   {/* Cantidad */}
                   <div className="absolute top-2 right-2 bg-yellow-400 text-gray-950 text-[10px] font-black px-1.5 py-0.5 rounded shadow-md z-10">
