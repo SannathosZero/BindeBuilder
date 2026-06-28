@@ -85,7 +85,11 @@ export default async function BinderPublicPage({ params }: { params: Promise<{ i
             >
               {slot ? (
                 <>
-                  <img src={slot.card.images.small} alt={slot.card.name} className="w-full h-full object-cover animate-fade-in" />
+                 <img 
+  src={(slot.card as any).images?.small || (slot.card as any).image} 
+  alt={slot.card.name} 
+  className="w-full h-full object-contain" 
+/>
                   
                   {/* Cantidad */}
                   <div className="absolute top-2 right-2 bg-yellow-400 text-gray-950 text-[10px] font-black px-1.5 py-0.5 rounded shadow-md z-10">
