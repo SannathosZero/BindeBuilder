@@ -1,20 +1,20 @@
-import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
 
+// 1. AQUÍ ESTÁ EL ARREGLO: Agrega esta línea que lee la URL
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+// 2. Asegúrate de usar el nombre correcto que configuramos
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY ?? '';
 
+// 3. Ahora esta validación no dará error porque ambas variables existen arriba:
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ ERROR: Faltan variables de entorno');
   console.error('NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? '✓' : '✗');
   console.error('SUPABASE_SERVICE_KEY:', supabaseServiceKey ? '✓' : '✗');
 }
 
-// Creamos un cliente con privilegios de servidor (ignora bloqueos de RLS / Caché)
-const supabaseAdmin = createClient(
-  supabaseUrl || '',
-  supabaseServiceKey || ''
-);
+// Asegúrate de que el cliente use las variables correctas aquí abajo también:
+const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 
 export async function POST(request: Request) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     console.log('📝 Guardando en Supabase:', { rows: body.rows, cols: body.cols });
 
     // Insertamos los datos directamente en la tabla binders de Supabase
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabase
       .from('binders')
       .insert([
         {
