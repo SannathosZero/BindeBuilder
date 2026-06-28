@@ -1,13 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Extraemos las variables dinámicamente o usamos un fallback string vacío para evitar que explote la carga inicial
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+// 1. Leemos las variables con los nombres que dejamos configurados en Vercel
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    "⚠️ [Supabase] Alerta: Las variables de entorno no están cargadas en este cliente. Asegúrate de reiniciar tu terminal con npm run dev."
-  );
+// 2. Validación para que Next.js no se queje al compilar
+if (!supabaseUrl || !supabaseServiceKey) {
+  console.error('❌ ERROR: Faltan variables de entorno en lib/supabase.ts');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// 3. Exportamos el cliente seguro para usarlo en todo el proyecto
+export const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
