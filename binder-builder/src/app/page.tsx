@@ -89,11 +89,11 @@ export default function Home() {
     } catch (error) {
       console.error("Error buscando cartas:", error);
     } finally {
-      loading && setLoading(false);
+      setLoading(false);
     }
   };
 
-  // 💾 FUNCIÓN DE GUARDADO OPTIMIZADA PARA SUPABASE VÍA API ROUTE
+  // 💾 FUNCIÓN DE GUARDADO CORREGIDA Y VINCULADA AL ESTADO REAL
   const saveBinder = async () => {
     // Validar que haya al menos una carta para no guardar carpetas vacías
     const hasCards = grid.some(slot => slot !== null);
@@ -104,12 +104,19 @@ export default function Home() {
 
     setSaving(true);
     try {
-      const response = await fetch('/api/binders', {
+      const response = await fetch('/api/binder', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows, cols, grid })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // Enviamos las variables reales del creador estructuradas para Supabase
+        body: JSON.stringify({
+          rows: rows,
+          cols: cols,
+          grid_data: grid
+        }),
       });
-
+      
       const data = await response.json();
 
       if (response.ok && data.id) {
@@ -272,142 +279,4 @@ export default function Home() {
         {/* Dimensiones */}
         <div className="flex gap-6 bg-gray-900 px-4 py-2 rounded-xl border border-gray-800 text-xs text-gray-400 shadow-inner">
           <label className="flex items-center gap-2">Filas: <span className="text-yellow-400 font-bold">{rows}</span> <input type="range" min="1" max="4" value={rows} onChange={(e) => handleDimensionChange(Number(e.target.value), cols)} className="accent-yellow-400 cursor-pointer" /></label>
-          <label className="flex items-center gap-2">Columnas: <span className="text-yellow-400 font-bold">{cols}</span> <input type="range" min="1" max="4" value={cols} onChange={(e) => handleDimensionChange(rows, Number(e.target.value))} className="accent-yellow-400 cursor-pointer" /></label>
-        </div>
-
-        {/* Matriz del Binder */}
-        <div 
-          className="grid gap-4 bg-gray-900 p-6 rounded-2xl border border-gray-800 shadow-2xl w-full max-w-2xl transition-all duration-300"
-          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-        >
-          {Array.from({ length: rows * cols }).map((_, index) => {
-            const slot = grid[index];
-            const isSelected = selectedSlot === index;
-            
-            return (
-              <div
-                key={index}
-                onClick={() => handleSlotClick(index)}
-                className={`aspect-[2.5/3.5] bg-gray-950 border-2 rounded-xl flex items-center justify-center cursor-pointer transition-all overflow-hidden relative group transform hover:scale-[1.02]
-                  ${isSelected ? 'border-yellow-400 ring-2 ring-yellow-400/20 bg-gray-900' : 'border-dashed border-gray-800 hover:border-gray-600'}
-                `}
-              >
-                {slot ? (
-                  <>
-                    <img src={slot.card.images.small} alt={slot.card.name} className="w-full h-full object-cover" />
-                    <div className="absolute top-2 right-2 bg-yellow-400 text-gray-950 text-[10px] font-black px-1.5 py-0.5 rounded shadow-md z-10">
-                      x{slot.quantity}
-                    </div>
-                    {slot.isReserved && (
-                      <div className="absolute inset-0 bg-red-950/40 backdrop-blur-[1px] flex items-center justify-center z-20">
-                        <span className="bg-red-600 text-white font-black text-[9px] uppercase px-2 py-0.5 rounded-md shadow-lg tracking-wider transform -rotate-12">RESERVADA</span>
-                      </div>
-                    )}
-                    {!slot.isReserved && (
-                      <div className="absolute top-2 left-2 bg-gray-950/80 backdrop-blur-xs text-[9px] font-bold px-1 rounded border border-gray-800 text-yellow-400">
-                        {slot.score}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-gray-800 text-xl font-light group-hover:text-gray-500">{isSelected ? '⭐' : '+'}</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Menú Lateral Flotante */}
-      <div className={`fixed top-0 right-0 h-full w-80 bg-gray-900 border-l border-gray-800 shadow-2xl z-50 p-5 flex flex-col gap-5 transition-transform duration-300 ease-in-out transform ${activeSlotData ? 'translate-x-0' : 'translate-x-full'}`}>
-        {activeSlotData && (
-          <>
-            <div className="flex justify-between items-center border-b border-gray-800 pb-3">
-              <h3 className="font-bold text-lg text-yellow-400 truncate max-w-[200px]">{activeSlotData.card.name}</h3>
-              <button 
-                onClick={() => setSelectedSlot(null)}
-                className="text-gray-400 hover:text-white bg-gray-950 px-2 py-1 text-xs rounded border border-gray-800 transition-colors"
-              >
-                Cerrar ✕
-              </button>
-            </div>
-
-            <div className="flex gap-3 bg-gray-950 p-3 rounded-xl border border-gray-800">
-              <img src={activeSlotData.card.images.small} alt="" className="h-20 w-auto rounded border border-gray-800" />
-              <div className="flex flex-col justify-center min-w-0 flex-1">
-                <p className="text-xs text-gray-400 truncate"><span className="font-semibold text-gray-300">Set:</span> {activeSlotData.card.set}</p>
-                <p className="text-xs text-gray-400 truncate"><span className="font-semibold text-gray-300">Rarity:</span> {activeSlotData.card.rarity}</p>
-                
-                <div className="mt-2 flex flex-col gap-1">
-                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Precio Estimado (USD)</span>
-                  <div className="flex items-center bg-gray-950 rounded-lg px-2 border border-gray-800 focus-within:border-yellow-400">
-                    <span className="text-yellow-400 font-bold text-sm">$</span>
-                    <input 
-                      type="number" 
-                      value={activeSlotData.card.marketPrice || ''} 
-                      placeholder="0.00"
-                      onChange={(e) => {
-                        const newPrice = parseFloat(e.target.value) || 0;
-                        updateSlotField(selectedSlot!, 'card', {
-                          ...activeSlotData.card,
-                          marketPrice: newPrice
-                        });
-                      }}
-                      className="w-full bg-transparent px-2 py-1 text-sm font-bold text-yellow-400 outline-none"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Unidades en Inventario</span>
-              <div className="flex items-center bg-gray-950 rounded-xl p-1 border border-gray-800">
-                <button onClick={() => updateSlotField(selectedSlot!, 'quantity', activeSlotData.quantity - 1)} className="w-9 h-9 bg-gray-900 hover:bg-red-500/20 text-red-400 rounded-lg font-bold transition-colors">-</button>
-                <span className="flex-1 text-center font-bold text-sm">x{activeSlotData.quantity}</span>
-                <button onClick={() => updateSlotField(selectedSlot!, 'quantity', activeSlotData.quantity + 1)} className="w-9 h-9 bg-gray-900 hover:bg-green-500/20 text-green-400 rounded-lg font-bold transition-colors">+</button>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Estado de conservación</span>
-              <select 
-                value={activeSlotData.score}
-                onChange={(e) => updateSlotField(selectedSlot!, 'score', e.target.value)}
-                className="bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-gray-200 outline-none focus:border-yellow-400 cursor-pointer"
-              >
-                {['10/10 (Gem)', '9/10 (Mint)', '8/10 (Near Mint)', '7/10 (Excellent)', '6/10 (Good)', '5/10 (Played)', 'Menos de 5 (Detalles graves)'].map((opt) => (
-                  <option key={opt} value={opt.split(' ')[0]} className="bg-gray-950">{opt}</option>
-                ))}
-              </select>
-            </div>
-
-            <label className="flex items-center gap-3 bg-gray-950 border border-gray-800 p-3 rounded-xl cursor-pointer hover:border-red-500/30 transition-colors">
-              <input 
-                type="checkbox" 
-                checked={activeSlotData.isReserved}
-                onChange={(e) => updateSlotField(selectedSlot!, 'isReserved', e.target.checked)}
-                className="w-4 h-4 accent-red-500 bg-gray-900 rounded border-gray-800 cursor-pointer"
-              />
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-gray-200">Marcar como Reservada</span>
-                <span className="text-[10px] text-gray-400">Añade un banner rojo sobre la carta</span>
-              </div>
-            </label>
-
-            <div className="flex flex-col gap-1.5 flex-1">
-              <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Detalles y Observaciones</span>
-              <textarea 
-                placeholder="Ej: Tiene un rayón leve atrás, lista para envío..."
-                value={activeSlotData.notes}
-                onChange={(e) => updateSlotField(selectedSlot!, 'notes', e.target.value)}
-                className="w-full flex-1 bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs outline-none focus:border-yellow-400 mercantile-textarea resize-none text-gray-200 font-sans"
-              />
-            </div>
-          </>
-        )}
-      </div>
-
-    </main>
-  );
-}
+          <label className="flex items-center gap-2">Columnas: <span className="text-yellow-400 font-bold">{cols}</span> <input type="range" min="
