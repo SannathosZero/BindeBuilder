@@ -36,14 +36,20 @@ async function getBinderData(id: string) {
   }
 }
 
-export default async function BinderPublicPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function BinderPublicPage(props: { params: Promise<{ id: string }> }) {
+  // 1. Esperamos de forma segura a que los parámetros de la URL existan
+  const params = await props.params;
+  const id = params.id;
+  
+  // 2. Ahora que tenemos el ID real, mandamos a pedir los datos a Supabase
   const binder = await getBinderData(id);
 
-  // Si el UUID no existe en la base de datos, muestra la página 404 nativa de Next.js
+  // Si el binder no existe en la base de datos, manda al 404
   if (!binder) {
     notFound();
   }
+  
+  // ... el resto de tu código igual hacia abajo ...
 
   const { rows, cols, grid_data } = binder;
   const grid = grid_data as (BinderSlot | null)[];
