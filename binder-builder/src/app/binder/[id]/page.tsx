@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase'; // 👈 Usamos el cliente único y corregido de tu proyecto
 import { notFound } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 interface PokemonCard {
   id: string;
   name: string;
