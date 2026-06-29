@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'; // 👈 Usamos el cliente único y centralizado
+import { supabase } from '@/src/lib/supabase'; // 👈 Usamos el cliente único y centralizado
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {

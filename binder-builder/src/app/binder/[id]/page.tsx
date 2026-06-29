@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'; // 👈 Usamos el cliente único y corregido de tu proyecto
+import { supabase } from '@/src/lib/supabase'; // 👈 Usamos el cliente único y corregido de tu proyecto
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
