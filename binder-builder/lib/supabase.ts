@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // 1. Leemos las variables con los nombres que dejamos configurados en Vercel
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
+const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY; 
 
 // 2. Validación para que Next.js no se queje al compilar
 if (!supabaseUrl || !supabaseServiceKey) {

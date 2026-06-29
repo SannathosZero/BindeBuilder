@@ -1,17 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase'; // 👈 Usamos el cliente único y centralizado
 import { NextResponse } from 'next/server';
-
-// Leemos las variables con los nombres correctos configurados en Vercel
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY; 
-
-// Validación limpia
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ ERROR: Faltan variables de entorno');
-}
-
-// Inicialización del cliente
-const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 
 export async function POST(request: Request) {
   try {
